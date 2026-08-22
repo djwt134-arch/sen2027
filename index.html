@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>쎈(SEN)진학 2027 대입 수시 대학별 분석 뷰어</title>
+
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;font-family:"Malgun Gothic","맑은 고딕",Arial,sans-serif;background:#eef4fa;color:#17385f}
+body{overflow:hidden}
+.app{display:flex;width:100vw;height:100vh;flex-direction:column}
+.topbar{height:48px;min-height:48px;background:#174d95;color:#fff;display:flex;align-items:center;padding:0 18px;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.topbar-title{font-size:18px;font-weight:800;letter-spacing:-.5px}
+.topbar-divider{height:22px;width:1px;background:rgba(255,255,255,.45)}
+.topbar-sub{font-size:14px;font-weight:700;opacity:.98}
+.topbar-badge{height:28px;padding:0 12px;border:1px solid rgba(255,255,255,.45);border-radius:5px;display:flex;align-items:center;font-size:13px;font-weight:700;background:rgba(255,255,255,.08)}
+.content{display:flex;flex:1;min-height:0}
+.sidebar{width:317px;min-width:317px;height:100%;background:#fff;border-right:1px solid #ccd8e6;display:flex;flex-direction:column}
+.search-area{padding:10px 14px 8px;border-bottom:1px solid #d7e0eb;display:flex;gap:8px;align-items:center}
+.search-wrap{position:relative;flex:1}
+#searchInput{width:100%;height:36px;border:1px solid #bcd0e7;border-radius:7px;padding:0 12px;font-size:14px;outline:none;background:#fff;color:#17385f}
+#searchInput:focus{border-color:#1759a7;box-shadow:0 0 0 2px rgba(23,89,167,.08)}
+.favorite-filter{height:36px;min-width:40px;border:1px solid #bcd0e7;border-radius:7px;background:#fff;color:#6d86a4;font-size:21px;cursor:pointer;line-height:1}
+.favorite-filter.active{background:#e7f1ff;border-color:#1a5aa7;color:#1659a8}
+.recent-row{height:34px;display:flex;align-items:center;padding:0 14px;border-bottom:1px solid #e1e7ef;font-size:12px;color:#6b7e96;gap:7px}
+.recent-chip{display:none;background:#1659a7;color:#fff;border-radius:4px;padding:4px 9px;font-weight:700}
+.university-list{flex:1;overflow-y:auto;padding:8px 10px}
+.university-item{height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;margin-bottom:1px;border:1px solid transparent;border-radius:7px;cursor:pointer;font-size:15px;color:#17385f}
+.university-item:hover{background:#f4f8fd}
+.university-item.active{background:#e6f0fc;border-color:#1b61b1;color:#1457a6;font-weight:700}
+.university-name{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.university-actions{display:flex;align-items:center;gap:8px}
+.star{font-size:24px;color:#91a9c8;cursor:pointer;line-height:1;user-select:none}
+.star.favorite{color:#f0a800}
+.main{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;background:#eef4fa}
+.main-title{height:78px;min-height:78px;background:#fff;border-bottom:1px solid #ccd8e6;display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+.main-univ-name{margin:0;color:#163f78;font-size:25px;font-weight:800;letter-spacing:-1px}
+.main-univ-sub{font-size:14px;color:#6c7e95;margin-top:5px}
+.menu-area{background:#fff;border-bottom:1px solid #ccd8e6;padding:9px 18px 10px}
+.menu-buttons{display:flex;flex-wrap:wrap;gap:7px}
+.menu-button{height:34px;border:1px solid #c7d8ed;background:#f8fbff;color:#173f70;border-radius:6px;padding:0 11px;font-size:13px;cursor:pointer;white-space:nowrap}
+.menu-button:hover{background:#eaf3ff}
+.menu-button.active{background:#1658a7;border-color:#1658a7;color:#fff;font-weight:700}
+.menu-button.important-1{color:#c62828;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;font-weight:700}
+.menu-button.important-7{color:#d81b73;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;font-weight:700}
+.menu-button.important-8{color:#1257b0;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;font-weight:700}
+.menu-button.important-9{color:#168447;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;font-weight:700}
+.menu-button.active.important-1,.menu-button.active.important-7,.menu-button.active.important-8,.menu-button.active.important-9{color:#fff}
+.pdf-area{flex:1;min-height:0;padding:12px}
+.pdf-box{width:100%;height:100%;background:#fff;border:1px solid #c9d7e6;border-radius:8px;overflow:hidden;position:relative}
+#pdfFrame{width:100%;height:100%;border:0;display:none}
+.pdf-message{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#8495aa;font-size:18px}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-thumb{background:#b9c8d8;border-radius:10px}
+::-webkit-scrollbar-track{background:#eef3f8}
+</style>
+
+<style id="university-name-dark">
+/* 왼쪽 대학명: 진한 검정 */
+.univ-item,
+.univ-item .univ-name,
+.university-item,
+.university-item .university-name,
+.college-item,
+.college-item .college-name,
+.univ-list button {
+  color: #111111 !important;
+  font-weight: 600;
+}
+</style>
+
+
+<style id="favorite-star-yellow">
+/* 관심대학 별: 진한 노랑 */
+.star,
+.favorite-star,
+.star-btn,
+button[aria-label*="관심"],
+button[title*="관심"] {
+  color: #d4a900 !important;
+  fill: #d4a900 !important;
+}
+</style>
+
+
+<style id="admission-link-style">
+.admission-link{
+  height:40px;
+  min-width:150px;
+  padding:0 15px;
+  border:1px solid #a9c8ee;
+  border-radius:8px;
+  background:#f7fbff;
+  color:#1659ad;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  font-size:14px;
+  font-weight:700;
+  white-space:nowrap;
+  box-shadow:0 1px 2px rgba(20,70,120,.06);
+}
+.admission-link:hover{
+  background:#eaf3ff;
+  border-color:#7faee2;
+}
+.admission-link.disabled{
+  color:#a5b0bd;
+  background:#f5f7f9;
+  border-color:#d7dfe8;
+  pointer-events:none;
+}
+</style>
+
+
+<style id="essay-score-university-style">
+/* 논술 합격자 점수를 공개한 대학 */
+ .university-item.essay-score-univ .univ-name,
+.university-item.essay-score-univ .university-name,
+.university-item.essay-score-univ .college-name {
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+  text-decoration-color: #111111;
+}
+</style>
+
+
+<style id="essay-score-legend-style">
+.essay-score-legend{
+  padding: 8px 16px 7px;
+  font-size: 13px;
+  color: #333;
+  background: #fff;
+  border-bottom: 1px solid #e5eaf0;
+  font-weight: 600;
+}
+.legend-underline{
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+  text-decoration-color: #111111;
+}
+</style>
+
+
+<style id="star-no-underline">
+.star,
+.favorite-star,
+.star-btn,
+#favoriteFilter,
+.favorite-filter {
+  text-decoration: none !important;
+  border-bottom: none !important;
+}
+</style>
+
+
+<style id="final-star-underline-fix">
+.star,
+.favorite-star,
+.star-btn,
+#favoriteFilter,
+.favorite-filter,
+button.star,
+button.favorite-star {
+  text-decoration: none !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+</style>
+
+
+<style id="absolute-star-underline-removal">
+/* 관심대학 별 자체와 별을 감싸는 버튼/요소의 밑줄 제거 */
+.star,
+.star *,
+.favorite-star,
+.favorite-star *,
+.star-btn,
+.star-btn *,
+#favoriteFilter,
+#favoriteFilter *,
+.favorite-filter,
+.favorite-filter *,
+button:has(.star),
+button:has(.favorite-star),
+button:has(.star-btn) {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-style: none !important;
+  text-decoration-color: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* 별 버튼의 hover/focus 상태에서도 밑줄이 생기지 않도록 */
+.star:hover,
+.star:focus,
+.star:active,
+.favorite-star:hover,
+.favorite-star:focus,
+.favorite-star:active,
+.star-btn:hover,
+.star-btn:focus,
+.star-btn:active,
+#favoriteFilter:hover,
+#favoriteFilter:focus,
+#favoriteFilter:active {
+  text-decoration: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+</style>
+
+
+<style id="star-line-final-fix">
+/* ★/☆ 관심대학 표시: 아래 선 완전 제거 */
+.star,
+.star.favorite,
+.university-item .star,
+.university-item .star.favorite,
+button.star,
+button.star.favorite,
+.favorite-filter,
+#favoriteFilter,
+.star::before,
+.star::after,
+.star.favorite::before,
+.star.favorite::after,
+.favorite-filter::before,
+.favorite-filter::after,
+#favoriteFilter::before,
+#favoriteFilter::after {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  border: 0 !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+
+/* 별을 포함하는 대학 행 자체에는 대학명 밑줄을 전달하지 않도록 */
+.university-item .star-wrap,
+.university-item .favorite-wrap,
+.university-item .star-container {
+  text-decoration: none !important;
+  border-bottom: 0 !important;
+}
+
+/* 별이 링크(<a>) 안에 있을 경우 링크 밑줄도 차단 */
+a:has(.star),
+a:has(.favorite-star),
+a:has(#favoriteFilter) {
+  text-decoration: none !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+</style>
+
+
+<style id="exact-essay-star-fix">
+.university-item.essay-score-univ {
+  text-decoration: none !important;
+}
+.university-item.essay-score-univ .star {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  border: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+</style>
+
+
+<style id="visible-university-underline">
+/* 논술점수 공개 대학명에만 실제 선을 그린다 */
+.university-item.essay-score-univ .university-name {
+  display: inline-block !important;
+  color: #111111 !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  border-bottom: 4px solid #111111 !important;
+  padding-bottom: 2px !important;
+}
+
+/* 별에는 선을 절대 표시하지 않는다 */
+.university-item.essay-score-univ .star {
+  display: inline-block !important;
+  text-decoration: none !important;
+  border: 0 !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+</style>
+
+</head>
+
+
+<body>
+
+<div class="app">
+    <header class="topbar">
+        <div class="topbar-title">쎈(SEN)진학 2027 대입 수시 대학별 분석 뷰어</div>
+        <div class="topbar-divider"></div>
+        <div class="topbar-sub">전국 대학 입시자료를 한눈에</div>
+        <div class="topbar-badge">다운로드 없이 즉시 열람 가능</div>
+    </header>
+
+    <div class="content">
+    <aside class="sidebar">
+        <div class="search-area">
+            <div class="search-wrap">
+                <input type="text" id="searchInput" placeholder="🔎 대학명 검색...">
+            </div>
+            <button class="favorite-filter" id="favoriteFilter" title="관심대학만 보기">☆</button>
+        </div>
+        <div class="recent-row"><span>관심대학</span><span class="recent-chip" id="favoriteCount">0</span><span style="margin-left:auto">☆ 별만 모아보기</span></div>
+
+        
+<div class="essay-score-legend">
+  <span class="legend-underline">밑줄친 대학</span>은 논술점수 수록
+</div>
+<div class="university-list" id="universityList">
+
+            <div class="essay-score-univ university-item active" data-name="가천대학교" data-pdf="가천대학교.pdf">
+                <span class="university-name">가천대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="가톨릭대학교" data-pdf="가톨릭대학교.pdf">
+                <span class="university-name">가톨릭대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="강서대학교" data-pdf="강서대학교.pdf">
+                <span class="university-name">강서대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="건국대학교" data-pdf="건국대학교.pdf">
+                <span class="university-name">건국대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="경기대학교" data-pdf="경기대학교.pdf">
+                <span class="university-name">경기대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="essay-score-univ university-item" data-name="경희대학교" data-pdf="경희대학교.pdf">
+                <span class="university-name">경희대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="고려대학교" data-pdf="고려대학교.pdf">
+                <span class="university-name">고려대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="고려대학교(세종)" data-pdf="고려대학교(세종).pdf">
+                <span class="university-name">고려대학교(세종)</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="essay-score-univ university-item" data-name="광운대학교" data-pdf="광운대학교.pdf">
+                <span class="university-name">광운대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="국민대학교" data-pdf="국민대학교.pdf">
+                <span class="university-name">국민대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="essay-score-univ university-item" data-name="단국대학교" data-pdf="단국대학교.pdf">
+                <span class="university-name">단국대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="대진대학교" data-pdf="대진대학교.pdf">
+                <span class="university-name">대진대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="덕성여자대학교" data-pdf="덕성여자대학교.pdf">
+                <span class="university-name">덕성여자대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="동국대학교" data-pdf="동국대학교.pdf">
+                <span class="university-name">동국대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="동덕여자대학교" data-pdf="동덕여자대학교.pdf">
+                <span class="university-name">동덕여자대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="동양대학교(동두천)" data-pdf="동양대학교(동두천).pdf">
+                <span class="university-name">동양대학교(동두천)</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="명지대학교" data-pdf="명지대학교.pdf">
+                <span class="university-name">명지대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="백석대학교" data-pdf="백석대학교.pdf">
+                <span class="university-name">백석대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="삼육대학교" data-pdf="삼육대학교.pdf">
+                <span class="university-name">삼육대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="상명대학교" data-pdf="상명대학교.pdf">
+                <span class="university-name">상명대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="서강대학교" data-pdf="서강대학교.pdf">
+                <span class="university-name">서강대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="서경대학교" data-pdf="서경대학교.pdf">
+                <span class="university-name">서경대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="essay-score-univ university-item" data-name="서울과학기술대학교" data-pdf="서울과학기술대학교.pdf">
+                <span class="university-name">서울과학기술대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="서울대학교" data-pdf="서울대학교.pdf">
+                <span class="university-name">서울대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="서울시립대학교" data-pdf="서울시립대학교.pdf">
+                <span class="university-name">서울시립대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="서울여자대학교" data-pdf="서울여자대학교.pdf">
+                <span class="university-name">서울여자대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="서울한영대학교" data-pdf="서울한영대학교.pdf">
+                <span class="university-name">서울한영대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="성공회대학교" data-pdf="성공회대학교.pdf">
+                <span class="university-name">성공회대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="성균관대학교" data-pdf="성균관대학교.pdf">
+                <span class="university-name">성균관대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="성신여자대학교" data-pdf="성신여자대학교.pdf">
+                <span class="university-name">성신여자대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="세종대학교" data-pdf="세종대학교.pdf">
+                <span class="university-name">세종대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="수원대학교" data-pdf="수원대학교.pdf">
+                <span class="university-name">수원대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="숙명여자대학교" data-pdf="숙명여자대학교.pdf">
+                <span class="university-name">숙명여자대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="essay-score-univ university-item" data-name="숭실대학교" data-pdf="숭실대학교.pdf">
+                <span class="university-name">숭실대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="essay-score-univ university-item" data-name="신한대학교" data-pdf="신한대학교.pdf">
+                <span class="university-name">신한대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="essay-score-univ university-item" data-name="아주대학교" data-pdf="아주대학교.pdf">
+                <span class="university-name">아주대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="연세대학교" data-pdf="연세대학교.pdf">
+                <span class="university-name">연세대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="연세대학교(미래)" data-pdf="연세대학교(미래).pdf">
+                <span class="university-name">연세대학교(미래)</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="용인대학교" data-pdf="용인대학교.pdf">
+                <span class="university-name">용인대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="essay-score-univ university-item" data-name="을지대학교" data-pdf="을지대학교.pdf">
+                <span class="university-name">을지대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="essay-score-univ university-item" data-name="이화여자대학교" data-pdf="이화여자대학교.pdf">
+                <span class="university-name">이화여자대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="인하대학교" data-pdf="인하대학교.pdf">
+                <span class="university-name">인하대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="essay-score-univ university-item" data-name="중앙대학교" data-pdf="중앙대학교.pdf">
+                <span class="university-name">중앙대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="essay-score-univ university-item" data-name="한국공학대학교" data-pdf="한국공학대학교.pdf">
+                <span class="university-name">한국공학대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="한국교원대학교" data-pdf="한국교원대학교.pdf">
+                <span class="university-name">한국교원대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="essay-score-univ university-item" data-name="한국기술교육대학교" data-pdf="한국기술교육대학교.pdf">
+                <span class="university-name">한국기술교육대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="한국외국어대학교" data-pdf="한국외국어대학교.pdf">
+                <span class="university-name">한국외국어대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="essay-score-univ university-item" data-name="한국항공대학교" data-pdf="한국항공대학교.pdf">
+                <span class="university-name">한국항공대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="한성대학교" data-pdf="한성대학교.pdf">
+                <span class="university-name">한성대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="essay-score-univ university-item" data-name="한양대학교" data-pdf="한양대학교.pdf">
+                <span class="university-name">한양대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="한양대학교(에리카)" data-pdf="한양대학교(에리카).pdf">
+                <span class="university-name">한양대학교(에리카)</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="홍익대학교" data-pdf="홍익대학교.pdf">
+                <span class="university-name">홍익대학교</span>
+                <span class="star">☆</span>
+            </div>
+
+            <div class="university-item" data-name="홍익대학교(세종)" data-pdf="홍익대학교(세종).pdf">
+                <span class="university-name">홍익대학교(세종)</span>
+                <span class="star">☆</span>
+            </div>
+
+        </div>
+    </aside>
+
+
+    <!-- =========================
+         오른쪽
+    ========================== -->
+
+    <main class="main">
+
+        <div class="main-title">
+            <div>
+                <h1 class="main-univ-name" id="mainUniversityName">가천대학교</h1>
+                <div class="main-univ-sub">2027학년도 대학별 분석자료</div>
+            </div>
+            <a
+                class="admission-link"
+                id="admissionLink"
+                href="https://admission.gachon.ac.kr/admission/html/main/main.asp"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="가천대학교 입학처 홈페이지"
+            >🌐 공식 입학처 ↗</a>
+        </div>
+
+
+        <!-- 9개 항목 -->
+
+        <div class="menu-area">
+
+            <div class="menu-buttons">
+
+                <button class="menu-button important-1 active" data-page="1">
+                    ① 2026 입시와 달라진 점
+                </button>
+
+                <button class="menu-button" data-page="1">
+                    ② 전형 일정
+                </button>
+
+                <button class="menu-button" data-page="2">
+                    ③ 모집단위 및 전형별 모집인원
+                </button>
+
+                <button class="menu-button" data-page="4">
+                    ④ 전형요소별 반영 비율
+                </button>
+
+                <button class="menu-button" data-page="4">
+                    ⑤ 수능최저학력기준
+                </button>
+
+                <button class="menu-button" data-page="5">
+                    ⑥ 학교생활기록부 반영 방법
+                </button>
+
+                <button class="menu-button important-7" data-page="6">
+                    ⑦ 주요 전형 분석 및 지원 전략
+                </button>
+
+                <button class="menu-button important-8" data-page="7">
+                    ⑧ 2026, 2025 대입 수시모집 경쟁률
+                </button>
+
+                <button class="menu-button important-9" data-page="9">
+                    ⑨ 2026, 2025 대입 수시모집 입시결과(대학 제공)
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- PDF 영역 -->
+
+        <div class="pdf-area">
+
+            <div class="pdf-box">
+
+                <div class="pdf-message" id="pdfMessage">
+                    PDF 자료를 불러오는 중입니다.
+                </div>
+
+                <iframe
+                    id="pdfFrame"
+                    title="대학별 분석자료 PDF">
+                </iframe>
+
+            </div>
+
+        </div>
+
+    </main>
+    </div>
+</div>
+
+<script>
+
+/* =====================================
+   기본 설정
+===================================== */
+
+const pdfFrame =
+    document.getElementById("pdfFrame");
+
+const pdfMessage =
+    document.getElementById("pdfMessage");
+
+const menuButtons =
+    document.querySelectorAll(".menu-button");
+
+const universityItems =
+    document.querySelectorAll(".university-item");
+
+const searchInput =
+    document.getElementById("searchInput");
+const favoriteFilter =
+    document.getElementById("favoriteFilter");
+const favoriteCount =
+    document.getElementById("favoriteCount");
+const mainUniversityName =
+    document.getElementById("mainUniversityName");
+const admissionLink =
+    document.getElementById("admissionLink");
+
+/* 대학별 공식 입학처 주소 */
+const admissionUrls = {
+    "가천대학교": "https://admission.gachon.ac.kr/admission/html/main/main.asp",
+    "가톨릭대학교": "https://ipsi.catholic.ac.kr/main.do",
+    "강서대학교": "https://entrance.gangseo.ac.kr/kcui/mainService",
+    "건국대학교": "https://enter.konkuk.ac.kr/",
+    "경기대학교": "https://enter.kyonggi.ac.kr/",
+    "경희대학교": "https://iphak.khu.ac.kr/",
+    "고려대학교": "https://oku.korea.ac.kr/",
+    "고려대학교(세종)": "https://oku.korea.ac.kr/",
+    "광운대학교": "https://iphak.kw.ac.kr/",
+    "국민대학교": "https://admission.kookmin.ac.kr/main.php",
+    "단국대학교": "https://ipsi.dankook.ac.kr/",
+    "대진대학교": "https://admission.daejin.ac.kr/",
+    "덕성여자대학교": "https://enter.duksung.ac.kr/",
+    "동국대학교": "https://ipsi.dongguk.edu/",
+    "동덕여자대학교": "https://ipsi.dongduk.ac.kr/",
+    "동양대학교(동두천)": "https://ipsi.dyu.ac.kr/",
+    "명지대학교": "https://iphak.mju.ac.kr/",
+    "백석대학교": "https://ipsi.bu.ac.kr/",
+    "삼육대학교": "https://ipsi.syu.ac.kr/",
+    "서강대학교": "https://admission.sogang.ac.kr/",
+    "서경대학교": "https://go.skuniv.ac.kr/",
+    "서울과학기술대학교": "https://admission.seoultech.ac.kr/",
+    "서울대학교": "https://admission.snu.ac.kr/",
+    "서울시립대학교": "https://admission.uos.ac.kr/admissionNew/main.do",
+    "서울여자대학교": "https://admission.swu.ac.kr/",
+    "서울한영대학교": "https://admission.shu.ac.kr/",
+    "성공회대학교": "https://enter.skhu.ac.kr/",
+    "성균관대학교": "https://admission.skku.edu/",
+    "성신여자대학교": "https://ipsi.sungshin.ac.kr/",
+    "세종대학교": "https://ipsi.sejong.ac.kr/",
+    "숙명여자대학교": "https://admission.sookmyung.ac.kr/",
+    "숭실대학교": "https://admission.ssu.ac.kr/",
+    "신한대학교": "https://ipsi.shinhan.ac.kr/",
+    "아주대학교": "https://www.iajou.ac.kr/",
+    "연세대학교": "https://admission.yonsei.ac.kr/seoul/",
+    "연세대학교(미래)": "https://admission.yonsei.ac.kr/wonju/",
+    "용인대학교": "https://ipsi.yongin.ac.kr/",
+    "을지대학교": "https://admission.eulji.ac.kr/",
+    "인하대학교": "https://admission.inha.ac.kr/",
+    "중앙대학교": "https://admission.cau.ac.kr/",
+    "한국공학대학교": "https://iphak.tukorea.ac.kr/",
+    "한국교원대학교": "https://ent.knue.ac.kr/",
+    "한국기술교육대학교": "https://ipsi.koreatech.ac.kr/",
+    "한국외국어대학교": "https://adms.hufs.ac.kr/",
+    "한국항공대학교": "https://ibhak.kau.ac.kr/",
+    "한성대학교": "https://enter.hansung.ac.kr/",
+    "한양대학교": "https://go.hanyang.ac.kr/",
+    "한양대학교(에리카)": "https://goerica.hanyang.ac.kr/",
+    "홍익대학교": "https://admission.hongik.ac.kr/",
+    "홍익대학교(세종)": "https://admission.hongik.ac.kr/"
+,
+    "이화여자대학교": "https://admission.ewha.ac.kr/admission/html/main/main.asp"
+,
+    "상명대학교": "https://admission.smu.ac.kr/"
+,
+    "수원대학교": "https://ipsi.suwon.ac.kr/"
+};
+
+function updateAdmissionLink() {
+    const url = admissionUrls[currentUniversity];
+
+    if (url) {
+        admissionLink.href = url;
+        admissionLink.textContent = "🌐 공식 입학처 ↗";
+        admissionLink.title = currentUniversity + " 입학처 홈페이지";
+        admissionLink.classList.remove("disabled");
+    } else {
+        admissionLink.removeAttribute("href");
+        admissionLink.textContent = "🌐 입학처 준비중";
+        admissionLink.title = "이 대학의 입학처 주소를 아직 등록하지 않았습니다.";
+        admissionLink.classList.add("disabled");
+    }
+}
+
+
+let showFavoritesOnly = false;
+let favorites = JSON.parse(localStorage.getItem("senjinhakFavorites") || "[]");
+
+
+/* 현재 선택된 대학 */
+
+let currentUniversity = "가천대학교";
+let currentPdf = "가천대학교.pdf";
+
+/* 대학별 ①~⑨ 제목 시작 페이지
+   [①, ②, ③, ④, ⑤, ⑥, ⑦, ⑧, ⑨] */
+const pageMap = {
+    "가천대학교": [1, 1, 2, 4, 4, 5, 6, 7, 9],
+    "경기대학교": [1, 1, 2, 3, 3, 3, 4, 7, 8],
+    "광운대학교": [1, 1, 2, 2, 3, 3, 3, 6, 7],
+    "덕성여자대학교": [1, 1, 1, 2, 2, 2, 3, 5, 6],
+    "명지대학교": [1, 1, 1, 3, 3, 3, 3, 6, 7],
+    "서강대학교": [1, 1, 1, 2, 2, 3, 3, 10, 12],
+    "서울시립대학교": [1, 1, 2, 3, 3, 3, 4, 7, 8],
+    "성균관대학교": [1, 1, 1, 3, 3, 4, 4, 8, 10],
+    "숙명여자대학교": [1, 1, 1, 3, 3, 3, 4, 6, 7],
+    "연세대학교(미래)": [1, 1, 2, 2, 3, 3, 4, 6, 6],
+    "이화여자대학교": [1, 1, 2, 3, 4, 4, 4, 9, 11],
+    "한국교원대학교": [1, 1, 1, 2, 2, 2, 3, 4, 5],
+    "한성대학교": [1, 2, 2, 3, 3, 3, 4, 5, 6],
+    "홍익대학교": [1, 1, 1, 2, 3, 3, 4, 6, 7],
+    "가톨릭대학교": [1, 1, 2, 3, 3, 4, 4, 8, 9],
+    "경희대학교": [1, 1, 2, 4, 4, 4, 5, 10, 12],
+    "국민대학교": [1, 1, 2, 3, 4, 4, 4, 10, 11],
+    "동국대학교": [1, 1, 2, 3, 4, 4, 4, 7, 9],
+    "백석대학교": [1, 1, 1, 2, 2, 3, 3, 5, 6],
+    "서경대학교": [1, 1, 1, 2, 2, 2, 2, 4, 5],
+    "서울여자대학교": [1, 1, 1, 3, 3, 3, 4, 7, 8],
+    "성신여자대학교": [1, 1, 2, 3, 3, 3, 4, 8, 9],
+    "숭실대학교": [1, 1, 2, 3, 3, 3, 4, 6, 7],
+    "연세대학교": [1, 1, 2, 3, 3, 4, 5, 15, 16],
+    "인하대학교": [1, 1, 2, 3, 3, 4, 4, 8, 9],
+    "한국기술교육대학교": [1, 1, 1, 2, 2, 3, 3, 4, 5],
+    "한양대학교(에리카)": [1, 1, 1, 3, 3, 3, 4, 6, 7],
+    "강서대학교": [1, 1, 2, 2, 2, 2, 3, 4, 4],
+    "고려대학교(세종)": [1, 1, 2, 3, 3, 3, 4, 5, 7],
+    "단국대학교": [1, 1, 2, 3, 4, 4, 4, 7, 8],
+    "동덕여자대학교": [1, 1, 2, 2, 3, 3, 3, 5, 6],
+    "삼육대학교": [1, 1, 2, 3, 3, 3, 4, 5, 6],
+    "서울과학기술대학교": [1, 1, 1, 3, 3, 3, 4, 5, 6],
+    "서울한영대학교": [1, 1, 1, 1, 1, 2, 2, 3, 3],
+    "세종대학교": [1, 1, 2, 3, 4, 4, 4, 7, 8],
+    "신한대학교": [1, 1, 2, 2, 3, 3, 3, 5, 6],
+    "용인대학교": [1, 1, 1, 2, 2, 2, 3, 4, 5],
+    "중앙대학교": [1, 1, 2, 3, 3, 4, 4, 7, 9],
+    "한국외국어대학교": [1, 1, 2, 4, 4, 4, 5, 8, 10],
+    "한양대학교": [1, 1, 2, 3, 4, 4, 4, 7, 10],
+    "건국대학교": [1, 1, 2, 4, 4, 4, 4, 10, 11],
+    "고려대학교": [1, 1, 2, 4, 4, 4, 5, 12, 13],
+    "대진대학교": [1, 1, 1, 2, 2, 3, 3, 6, 7],
+    "동양대학교(동두천)": [1, 1, 1, 2, 2, 2, 3, 3, 4],
+    "상명대학교": [1, 1, 1, 2, 2, 3, 3, 4, 6],
+    "서울대학교": [1, 1, 1, 3, 3, 4, 4, 12, 14],
+    "성공회대학교": [1, 1, 1, 2, 2, 2, 2, 3, 4],
+    "수원대학교": [1, 1, 2, 2, 2, 3, 3, 5, 6],
+    "아주대학교": [1, 1, 2, 3, 3, 3, 4, 6, 7],
+    "을지대학교": [1, 1, 2, 2, 3, 3, 3, 5, 6],
+    "한국공학대학교": [1, 1, 1, 2, 2, 3, 3, 5, 6],
+    "한국항공대학교": [1, 1, 2, 2, 3, 3, 3, 6, 7],
+    "홍익대학교(세종)": [1, 1, 1, 2, 2, 3, 3, 5, 6]
+};
+
+
+/* =====================================
+   PDF 페이지 이동
+
+   핵심:
+   기존 iframe을 먼저 비우고
+   아주 잠깐 기다린 뒤 다시 불러온다.
+   그래야 Edge가 PDF를 새로 읽는다.
+===================================== */
+
+function movePdfToPage(pageNumber) {
+
+    if (!currentPdf) {
+        return;
+    }
+
+    pdfMessage.style.display = "flex";
+    pdfMessage.textContent =
+        "PDF " + pageNumber + "페이지를 불러오는 중입니다.";
+
+    pdfFrame.style.display = "none";
+
+    /*
+       기존 PDF 제거
+    */
+    pdfFrame.src = "";
+
+    /*
+       강제로 새로 읽기
+    */
+    setTimeout(function() {
+
+        const cacheBuster =
+            "?pageview=" +
+            Date.now();
+
+        const newUrl =
+            encodeURI(currentPdf) +
+            cacheBuster +
+            "#page=" +
+            pageNumber;
+
+        pdfFrame.src = newUrl;
+
+        pdfFrame.onload = function() {
+
+            pdfMessage.style.display = "none";
+            pdfFrame.style.display = "block";
+
+        };
+
+    }, 150);
+
+}
+
+
+/* =====================================
+   처음 실행
+===================================== */
+
+movePdfToPage(1);
+updateAdmissionLink();
+
+
+/* =====================================
+   ①~⑨ 버튼
+===================================== */
+
+menuButtons.forEach(function(button) {
+
+    button.addEventListener("click", function() {
+
+        /*
+           선택 표시 변경
+        */
+
+        menuButtons.forEach(function(otherButton) {
+
+            otherButton.classList.remove("active");
+
+        });
+
+        button.classList.add("active");
+
+
+        /*
+           페이지 번호 가져오기
+        */
+
+        const menuIndex =
+            Array.from(menuButtons).indexOf(button);
+
+        const pages = pageMap[currentUniversity];
+
+        const page = pages
+            ? pages[menuIndex]
+            : Number(button.dataset.page);
+
+
+        /*
+           PDF 이동
+        */
+
+        movePdfToPage(page);
+
+    });
+
+});
+
+
+/* =====================================
+   대학 선택
+===================================== */
+
+universityItems.forEach(function(item) {
+
+    const star = item.querySelector(".star");
+
+    if (favorites.includes(item.dataset.name)) {
+        star.textContent = "★";
+        star.classList.add("favorite");
+    }
+
+    item.addEventListener("click", function(e) {
+        if (e.target.classList.contains("star")) return;
+
+        universityItems.forEach(function(otherItem) {
+            otherItem.classList.remove("active");
+        });
+
+        item.classList.add("active");
+        currentUniversity = item.dataset.name;
+        currentPdf = item.dataset.pdf || (currentUniversity + ".pdf");
+        mainUniversityName.textContent = currentUniversity;
+        updateAdmissionLink();
+        movePdfToPage(1);
+    });
+
+    star.addEventListener("click", function(e) {
+        e.stopPropagation();
+        const name = item.dataset.name;
+        if (favorites.includes(name)) {
+            favorites = favorites.filter(n => n !== name);
+            star.textContent = "☆";
+            star.classList.remove("favorite");
+        } else {
+            favorites.push(name);
+            star.textContent = "★";
+            star.classList.add("favorite");
+        }
+        localStorage.setItem("senjinhakFavorites", JSON.stringify(favorites));
+        updateFavoriteCount();
+        applyUniversityFilters();
+    });
+});
+
+function updateFavoriteCount() {
+    favoriteCount.textContent = favorites.length;
+    favoriteCount.style.display = favorites.length ? "inline-block" : "none";
+}
+
+function applyUniversityFilters() {
+    const keyword = searchInput.value.trim().toLowerCase();
+    universityItems.forEach(function(item) {
+        const name = item.dataset.name.toLowerCase();
+        const matchesSearch = name.includes(keyword);
+        const matchesFavorite = !showFavoritesOnly || favorites.includes(item.dataset.name);
+        item.style.display = (matchesSearch && matchesFavorite) ? "flex" : "none";
+    });
+}
+
+favoriteFilter.addEventListener("click", function() {
+    showFavoritesOnly = !showFavoritesOnly;
+    favoriteFilter.classList.toggle("active", showFavoritesOnly);
+    favoriteFilter.textContent = showFavoritesOnly ? "★" : "☆";
+    applyUniversityFilters();
+});
+
+updateFavoriteCount();
+
+
+/* =====================================
+   대학 검색
+===================================== */
+
+searchInput.addEventListener("input", applyUniversityFilters);
+
+</script>
+
+</body>
+</html>
