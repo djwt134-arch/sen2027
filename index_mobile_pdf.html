@@ -963,14 +963,12 @@ function movePdfToPage(pageNumber) {
         "PDF " + pageNumber + "페이지를 불러오는 중입니다.";
 
     /* 모바일: PDF.js로 페이지를 사이트 안에서 표시 */
-    if (window.matchMedia("(max-width: 768px)").matches) {
-        pdfFrame.style.display = "none";
-        pdfFrame.src = "";
-        if (window.renderMobilePdfPage) {
-            window.renderMobilePdfPage(currentPdf, pageNumber);
-        }
-        return;
-    }
+    if (window.renderMobilePdfPage) {
+    pdfFrame.style.display = "none";
+    pdfFrame.src = "";
+    window.renderMobilePdfPage(currentPdf, pageNumber);
+    return;
+}
 
     /* PC: 기존 방식 그대로 유지 */
     const mobileViewer = document.getElementById("mobilePdfViewer");
