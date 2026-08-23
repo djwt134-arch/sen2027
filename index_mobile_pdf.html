@@ -759,7 +759,7 @@ window.renderMobilePdfPage = async function(url, pageNumber) {
     console.error("Mobile PDF error:", error);
     viewer.style.display = "none";
     message.style.display = "flex";
-    message.innerHTML = 'PDF를 불러오지 못했습니다.<br><small>잠시 후 다시 시도해 주세요.</small>';
+    message.innerHTML = 'PDF 오류: ' + error.message;
   }
 };
 </script>
