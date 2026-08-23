@@ -1061,47 +1061,109 @@ menuButtons.forEach(function(button) {
    대학 선택
 ===================================== */
 
-universityItems.forEach(function(item) {
+/* =========================================
+   대학 선택
+   ========================================= */
 
-    const star = item.querySelector(".star");
+const universityList = document.getElementById("universityList");
 
-    if (favorites.includes(item.dataset.name)) {
-        star.textContent = "★";
-        star.classList.add("favorite");
-    }
+if (universityList) {
 
-    item.addEventListener("click", function(e) {
-        if (e.target.classList.contains("star")) return;
+    /* 별표 초기 표시 */
+    universityItems.forEach(function(item) {
 
+        const star = item.querySelector(".star");
+
+        if (!star) return;
+
+        if (favorites.includes(item.dataset.name)) {
+            star.textContent = "★";
+            star.classList.add("favorite");
+        } else {
+            star.textContent = "☆";
+            star.classList.remove("favorite");
+        }
+    });
+
+
+    /* 대학 클릭 */
+    universityList.addEventListener("click", function(e) {
+
+        /* 별표를 클릭한 경우 대학 선택은 하지 않음 */
+        if (e.target.closest(".star")) {
+            return;
+        }
+
+        /* 실제로 클릭한 대학 찾기 */
+        const item = e.target.closest(".university-item");
+
+        if (!item) {
+            return;
+        }
+
+        /* 기존 선택 해제 */
         universityItems.forEach(function(otherItem) {
             otherItem.classList.remove("active");
         });
 
+        /* 새 대학 선택 */
         item.classList.add("active");
+
+        /* 대학 정보 변경 */
         currentUniversity = item.dataset.name;
         currentPdf = item.dataset.pdf || (currentUniversity + ".pdf");
-        mainUniversityName.textContent = currentUniversity;
+
+        if (mainUniversityName) {
+            mainUniversityName.textContent = currentUniversity;
+        }
+
         updateAdmissionLink();
+
+        /* PDF 1페이지 */
         movePdfToPage(1);
     });
 
-    star.addEventListener("click", function(e) {
-        e.stopPropagation();
-        const name = item.dataset.name;
-        if (favorites.includes(name)) {
-            favorites = favorites.filter(n => n !== name);
-            star.textContent = "☆";
-            star.classList.remove("favorite");
-        } else {
-            favorites.push(name);
-            star.textContent = "★";
-            star.classList.add("favorite");
-        }
-        localStorage.setItem("senjinhakFavorites", JSON.stringify(favorites));
-        updateFavoriteCount();
-        applyUniversityFilters();
+
+    /* 별표 클릭 */
+    universityItems.forEach(function(item) {
+
+        const star = item.querySelector(".star");
+
+        if (!star) return;
+
+        star.addEventListener("click", function(e) {
+
+            e.stopPropagation();
+
+            const name = item.dataset.name;
+
+            if (favorites.includes(name)) {
+
+                favorites = favorites.filter(function(n) {
+                    return n !== name;
+                });
+
+                star.textContent = "☆";
+                star.classList.remove("favorite");
+
+            } else {
+
+                favorites.push(name);
+
+                star.textContent = "★";
+                star.classList.add("favorite");
+            }
+
+            localStorage.setItem(
+                "senjinhakFavorites",
+                JSON.stringify(favorites)
+            );
+
+            updateFavoriteCount();
+            applyUniversityFilters();
+        });
     });
-});
+}
 
 function updateFavoriteCount() {
     favoriteCount.textContent = favorites.length;
