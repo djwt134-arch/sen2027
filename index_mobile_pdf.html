@@ -736,7 +736,12 @@ window.renderMobilePdfPage = async function(url, pageNumber) {
       "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.mjs";
 
     const cleanUrl = url.split("#")[0];
-    const pdf = await pdfjsLib.getDocument(cleanUrl).promise;
+   const pdf = await Promise.race([
+    pdfjsLib.getDocument(cleanUrl).promise,
+    new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("PDF 불러오기 시간 초과")), 10000)
+    )
+]);
     const page = await pdf.getPage(Number(pageNumber));
 
     const base = page.getViewport({ scale: 1 });
